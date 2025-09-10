@@ -243,8 +243,10 @@ ssize_t getline(char** dest, size_t* n, FILE* file){
     assert(file != NULL);
 
     const int INCREASE_BUFFER = 2;
+    const int DEFAULT_BUFFER = 1024;
 
     if (*dest == NULL){
+        *n = DEFAULT_BUFFER;
         *dest = (char* )calloc(*n, sizeof(char));
     }
 
@@ -261,10 +263,13 @@ ssize_t getline(char** dest, size_t* n, FILE* file){
 
         else if (counter > *n - 1){ //проверка выхода за гарницы массива
            (*n) *= INCREASE_BUFFER;
-           *dest = (char* )realloc(*dest, *n);
-/*            printf("\n%d\n", *n);
- *            printf("counter: %d\n", counter);
- */
+           char* check = (char* )realloc(*dest, *n);
+           if (check == NULL){
+                free(*dest);
+                *dest = NULL;
+                return -1;
+           }
+            *dest = check;
            (*dest)[counter] = char_from_file;
         }else
             //printf("%c\n", char_from_file);
@@ -277,6 +282,5 @@ ssize_t getline(char** dest, size_t* n, FILE* file){
     (*dest)[counter] = '\0';
 
     return counter;
-
 }
 
